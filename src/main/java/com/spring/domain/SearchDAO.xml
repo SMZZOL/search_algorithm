@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.domain.SearchDAO">
+	<select id="list_selectByUid" resultType="com.spring.domain.SearchDTO">
+	select 
+		user_uid,
+		c_uid,
+		s_weight,
+		s_cnt,
+		s_time
+	from
+		search
+	where user_uid = #{uid}
+	order by s_weight desc
+	</select>
+	
+	
+	<select id="trend_list" resultType="com.spring.domain.TrendDTO">
+	select 
+		c_uid,
+		t_weight
+	from
+		trend
+	order by t_weight desc
+	</select>
+	
+	<select id="search_cat_value" resultType="com.spring.domain.CatvalueDTO">
+		select c_uid
+		from cat_keyword
+		where cat_keyvalue = #{cat_keyvalue}
+	</select>
+	
+	
+	<select id="realtime_list" resultType="com.spring.domain.CatvalueDTO">
+		select distinct  ck.cat_keyvalue,ck.c_uid, count(cat_keyvalue) over(partition by cat_keyvalue) as cnt
+	 	from (select * from cat_keyword ck1 where ck1.value_date between date_add(now(),interval-1 day) and now()) ck	
+		order by cnt desc
+		limit 10
+	</select>
+	
+	<select id="getcatbycuid" resultType="com.spring.domain.CatvalueDTO">
+		select distinct  ck.cat_keyvalue, count(cat_keyvalue) over(partition by cat_keyvalue) as cnt
+		from cat_keyword ck 
+		where c_uid = #{c_uid}
+		order by cnt desc
+		limit 5
+	</select>
+	
+	
+	
+	<select id="timeweight" resultType="com.spring.domain.SearchDTO">
+	select
+		user_uid,
+		c_uid
+	from search
+	where user_uid = #{param1}
+	order by s_time
+	</select>
+	
+	<select id="cntweight" resultType="com.spring.domain.SearchDTO">
+	select
+		user_uid,
+		c_uid
+	from search
+	where user_uid = #{param1}
+	order by s_cnt
+	</select>
+	
+	<update id="set_trend_weight" flushCache="true">
+	update trend 
+	set t_weight = (select sum(s_weight) from search  where c_uid = #{param1})
+	where c_uid = #{param1}
+	</update>
+	
+	
+	<update id="increases_cnt" flushCache="true">
+	UPDATE search
+	SET s_cnt = s_cnt +1
+	WHERE user_uid = #{param1} and c_uid = #{param2}
+	</update>
+	
+	<update id="weightclear" flushCache="true">
+	update search
+	set s_weight = 0
+	where user_uid = #{param1}
+	</update>
+	
+	<update id="putweight" flushCache="true">
+	update search
+	set s_weight = s_weight + #{param3}
+	WHERE user_uid = #{param1} and c_uid = #{param2}
+	</update>
+	
+	<select id="search_list" resultType="com.spring.domain.SearchDTO">
+	select 
+		user_uid,
+		c_uid,
+		s_weight,
+		s_cnt,
+		s_time
+	from
+		search
+	where user_uid = #{param1} and c_uid = #{param2}
+	order by s_weight desc
+	</select>
+	
+	<select id="cntcheck" resultType="int">
+	select count(*) from search where user_uid = #{param1}
+	</select>
+	
+	<update id="timeupdate" flushCache="true">
+	UPDATE search
+	SET s_time = now()
+	WHERE user_uid = #{param1} and c_uid = #{param2}
+	</update>
+	
+	
+	<insert id="add_cat_keyword" flushCache="true">
+	insert into cat_keyword (c_uid, cat_keyvalue)
+	values (#{param1}, #{param2})
+	</insert>
+	
+	<update id="increase_cat_cnt" flushCache="true">
+	update cat_keyword
+	set cat_cnt = cat_cnt + 1
+	where cat_keyvalue = #{param1}
+	
+	</update>
+	
+	
+	
+	
+	
+	
+	
+</mapper>
