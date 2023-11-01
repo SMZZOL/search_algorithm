@@ -32,28 +32,6 @@ CREATE TABLE category
 );
 
 
-CREATE TABLE chat
-(
-	chat_uid int NOT NULL AUTO_INCREMENT,
-	PRIMARY KEY (chat_uid)
-);
-
-
-CREATE TABLE chat_message
-(
-	user_uid int NOT NULL,
-	chat_uid int NOT NULL,
-	c_content text NOT NULL
-);
-
-
-CREATE TABLE chat_rel
-(
-	user_uid int NOT NULL,
-	chat_uid int NOT NULL
-);
-
-
 CREATE TABLE search
 (
 	user_uid int NOT NULL,
